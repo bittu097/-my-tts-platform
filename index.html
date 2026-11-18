@@ -1,166 +1,203 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Voice Studio</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 25px 15px;
-      background: #10121a;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
-    .container {
-      max-width: 600px;
-      margin: 35px auto;
-      background: #1c2030;
-      padding: 25px;
-      border-radius: 18px;
-    }
-    h1 { text-align: center; }
-    .sub {
-      text-align: center;
-      color: #aeb4c5;
-      margin-bottom: 30px;
-    }
-    label {
-      display: block;
-      margin: 20px 0 9px;
-      font-weight: bold;
-    }
-    select, textarea {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid #41475b;
-      background: #111522;
-      color: white;
-      font-size: 16px;
-    }
-    textarea {
-      min-height: 190px;
-      resize: vertical;
-    }
-    button {
-      width: 100%;
-      padding: 16px;
-      margin-top: 20px;
-      border: 0;
-      border-radius: 10px;
-      background: #8065ff;
-      color: white;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:disabled {
-      background: #5a4b9e;
-      cursor: not-allowed;
-    }
-    #status {
-      text-align: center;
-      color: #b9b4ff;
-      margin-top: 25px;
-      min-height: 40px;
-    }
-    .count {
-      text-align: right;
-      color: #aeb4c5;
-      font-size: 13px;
-      margin-top: 7px;
-    }
-    audio {
-      width: 100%;
-      margin-top: 15px;
-      border-radius: 8px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Voice Studio</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --neon-pink: #ff2a6d;
+            --neon-cyan: #05d9e8;
+            --dark-bg: #0b0f19;
+            --glass-bg: rgba(16, 18, 26, 0.75);
+        }
+        body {
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 50% 50%, #151a2d 0%, #05070a 100%);
+        }
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(5, 217, 232, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 0 20px rgba(5, 217, 232, 0.1), inset 0 0 10px rgba(255, 42, 109, 0.05);
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--neon-cyan);
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--neon-pink);
+            color: #fff;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 12px var(--neon-pink);
+            border-color: #fff;
+        }
+        textarea {
+            height: 130px;
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-shadow: 0 0 5px var(--neon-cyan);
+            box-shadow: inset 0 0 10px rgba(5, 217, 232, 0.2);
+        }
+        button:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .loader {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            color: var(--neon-pink);
+            font-weight: bold;
+            text-shadow: 0 0 8px var(--neon-pink);
+        }
+        #audioPlayer {
+            width: 100%;
+            margin-top: 20px;
+            display: none;
+            border-radius: 30px;
+        }
+        .error {
+            color: var(--neon-pink);
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>My Voice Studio</h1>
-    <p class="sub">AI Text to Speech Studio</p>
 
-    <label for="voice">Choose Your Voice</label>
-    <select id="voice">
-      <option value="hi-IN-MadhurNeural">Hindi - Madhur (Male Voice)</option>
-      <option value="hi-IN-SwaraNeural">Hindi - Swara (Female Voice)</option>
-    </select>
-
-    <label for="script">Your Script</label>
-    <textarea id="script"
-      maxlength="10000"
-      placeholder="Paste your Nanda Devi or village documentary script here..."></textarea>
-
-    <div class="count" id="count">0 / 10,000</div>
-
-    <button id="generateBtn" onclick="generateAudio()">Generate Audio</button>
+<div class="container">
+    <h1>🎙️ Voice Studio</h1>
     
-    <div id="status">Write your script and click generate.</div>
-  </div>
+    <label>🔑 Secret Passcode</label>
+    <input type="password" id="passcode" placeholder="Unlock engine...">
 
-  <script>
-    const script = document.getElementById("script");
-    const count = document.getElementById("count");
-    const btn = document.getElementById("generateBtn");
+    <label>📝 Hindi Script</label>
+    <textarea id="text" placeholder="Apni kahani ya script yahan likhein..."></textarea>
+    
+    <label>👤 Voice Profile</label>
+    <select id="voice">
+        <option value="hi-IN-MadhurNeural">Madhur (Male - Documentary)</option>
+        <option value="hi-IN-SwaraNeural">Swara (Female - Storytelling)</option>
+    </select>
+    
+    <button id="generateBtn" onclick="generateAudio()">Generate Audio ⚡</button>
+    
+    <div class="loader" id="loader">Audio Process ho rahi hai... ⏳</div>
+    <div class="error" id="errorMsg"></div>
+    
+    <audio id="audioPlayer" controls></audio>
+</div>
 
-    script.addEventListener("input", () => {
-      count.textContent = script.value.length + " / 10,000";
-    });
+<script>
+    const BACKEND_URL = "https://my-tts-platform.onrender.com/generate";
 
     async function generateAudio() {
-      const text = script.value.trim();
-      const voice = document.getElementById("voice").value;
-      const status = document.getElementById("status");
+        const text = document.getElementById("text").value;
+        const voice = document.getElementById("voice").value;
+        const passcode = document.getElementById("passcode").value;
+        
+        const btn = document.getElementById("generateBtn");
+        const loader = document.getElementById("loader");
+        const audioPlayer = document.getElementById("audioPlayer");
+        const errorMsg = document.getElementById("errorMsg");
 
-      if (!text) {
-        status.innerHTML = "<span style='color: #ff6b6b;'>Please enter your script first.</span>";
-        return;
-      }
+        errorMsg.innerText = "";
+        audioPlayer.style.display = "none";
 
-      // Start loading state
-      btn.disabled = true;
-      btn.textContent = "Generating... Please wait";
-      status.innerHTML = "Connecting to server... ⏳";
-
-      try {
-        // Send request to your live Render server
-        const response = await fetch("https://my-tts-platform.onrender.com/generate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            text: text,
-            voice: voice
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error("Server error or still warming up.");
+        if (!passcode) {
+            errorMsg.innerText = "Bhai, pehle Passcode daalo!";
+            return;
+        }
+        if (!text) {
+            errorMsg.innerText = "Script toh likho!";
+            return;
         }
 
-        // Get the audio file and create a link
-        const blob = await response.blob();
-        const audioUrl = URL.createObjectURL(blob);
-        
-        // Show audio player
-        status.innerHTML = `
-          <span style='color: #4cd137;'>Audio is ready! 🎉</span><br>
-          <audio controls autoplay src="${audioUrl}"></audio>
-        `;
+        btn.disabled = true;
+        loader.style.display = "block";
 
-      } catch (error) {
-        status.innerHTML = `<span style='color: #ff6b6b;'>Error: ${error.message} <br> (If server was sleeping, try again in 30 seconds)</span>`;
-      } finally {
-        // Reset button state
-        btn.disabled = false;
-        btn.textContent = "Generate Audio";
-      }
+        try {
+            const response = await fetch(BACKEND_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text, voice, passcode }) 
+            });
+
+            if (response.status === 401) {
+                throw new Error("❌ Access Denied: Galat Passcode!");
+            }
+            if (!response.ok) {
+                throw new Error("Server error! Thodi der baad try karo.");
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            audioPlayer.src = url;
+            audioPlayer.style.display = "block";
+            
+        } catch (error) {
+            errorMsg.innerText = error.message;
+        } finally {
+            btn.disabled = false;
+            loader.style.display = "none";
+        }
     }
-  </script>
+</script>
 </body>
 </html>
