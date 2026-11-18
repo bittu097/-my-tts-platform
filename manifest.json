@@ -1,0 +1,15 @@
+{
+  "name": "My Voice Studio",
+  "short_name": "VoiceStudio",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#05d9e8",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3293/3293024.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
