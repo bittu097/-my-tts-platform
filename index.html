@@ -672,7 +672,7 @@
             const lockUntil = parseInt(localStorage.getItem(STORAGE_KEYS.lockUntil) || "0", 10);
             const now = Date.now();
             const inputEl = document.getElementById("passwordInput");
-            const btnEl = doc ument.getElementById("unlockBtn");
+            const btnEl = document.getElementById("unlockBtn");
             const bannerEl = document.getElementById("cooldownBanner");
 
             if (cooldownInterval) {
