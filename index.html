@@ -3,201 +3,953 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Voice Studio</title>
+    <title>AFSAR ™ STUDIO</title>
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
-            --neon-pink: #ff2a6d;
-            --neon-cyan: #05d9e8;
-            --dark-bg: #0b0f19;
-            --glass-bg: rgba(16, 18, 26, 0.75);
+            --cyan: #00f2fe;
+            --cyan-glow: rgba(0, 242, 254, 0.35);
+            --silver: #e6f1ff;
+            --bg-black: #000000;
+            --panel-bg: #080b10;
+            --border-subtle: rgba(0, 242, 254, 0.22);
+            --danger: #ff3b5c;
+            --success: #00e676;
         }
-        body {
-            background-color: var(--dark-bg);
-            color: #fff;
-            font-family: 'Segoe UI', sans-serif;
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
-            display: flex;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: var(--silver);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Screen Containers */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            width: 100%;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background-image: radial-gradient(circle at 50% 50%, #151a2d 0%, #05070a 100%);
+            padding: 24px;
+            background-color: var(--bg-black);
         }
-        .container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(5, 217, 232, 0.2);
-            border-radius: 16px;
-            padding: 30px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 0 20px rgba(5, 217, 232, 0.1), inset 0 0 10px rgba(255, 42, 109, 0.05);
+
+        .screen.active {
+            display: flex;
         }
-        h1 {
+
+        /* 1. Welcome Screen */
+        #welcomeScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: radial-gradient(circle at center, #07131a 0%, #000000 72%);
+            flex-direction: column;
             text-align: center;
-            font-size: 24px;
-            text-transform: uppercase;
+            opacity: 0;
+        }
+
+        .welcome-content {
+            transform: scale(0.92) translateY(12px);
+            opacity: 0;
+            transition: opacity 0.85s ease, transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        #welcomeScreen.animate-in {
+            opacity: 1;
+        }
+
+        #welcomeScreen.animate-in .welcome-content {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        #welcomeScreen.animate-out {
+            opacity: 0;
+            transition: opacity 0.75s ease;
+        }
+
+        #welcomeScreen.animate-out .welcome-content {
+            opacity: 0;
+            transform: scale(1.06) translateY(-10px);
+            transition: opacity 0.75s ease, transform 0.75s ease;
+        }
+
+        .brand-logo-wrap {
+            width: 112px;
+            height: 112px;
+            margin: 0 auto 22px;
+            border-radius: 26px;
+            border: 1.5px solid var(--border-subtle);
+            background: #05080d;
+            box-shadow: 0 0 28px var(--cyan-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .brand-logo-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .welcome-title {
+            font-size: clamp(22px, 5.5vw, 34px);
+            font-weight: 800;
             letter-spacing: 2px;
-            text-shadow: 0 0 8px var(--neon-cyan), 0 0 20px var(--neon-cyan);
-            margin-bottom: 30px;
-            color: #fff;
+            color: #ffffff;
+            text-shadow: 0 0 18px var(--cyan-glow);
         }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--neon-cyan);
+
+        .welcome-title .tm-symbol {
+            color: var(--cyan);
+            font-weight: 700;
+            margin-left: 2px;
+        }
+
+        /* 2. Password Lock Screen */
+        #lockScreen {
+            background-color: #000000;
+            flex-direction: column;
+        }
+
+        .lock-box {
+            width: 100%;
+            max-width: 400px;
+            background: #05070a;
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            border-radius: 18px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 0 35px rgba(0, 242, 254, 0.08);
+        }
+
+        .lock-logo {
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 18px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .lock-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .attempts-text {
             font-size: 13px;
-            letter-spacing: 1px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--cyan);
+            margin-bottom: 10px;
             text-transform: uppercase;
         }
-        input, select, textarea {
+
+        .attempts-text.warning {
+            color: var(--danger);
+        }
+
+        .lock-prompt {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.45;
+            letter-spacing: 0.8px;
+            color: #ffffff;
+            margin-bottom: 22px;
+            text-transform: uppercase;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 242, 254, 0.35);
+            background: #000000;
+            color: #ffffff;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 3px;
+            margin-bottom: 14px;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .password-input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 14px var(--cyan-glow);
+        }
+
+        .password-input:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .unlock-btn {
             width: 100%;
             padding: 14px;
-            margin-bottom: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--neon-pink);
-            color: #fff;
+            border-radius: 10px;
+            border: 1px solid var(--cyan);
+            background: rgba(0, 242, 254, 0.12);
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .unlock-btn:hover:not(:disabled) {
+            background: var(--cyan);
+            color: #000000;
+            box-shadow: 0 0 18px var(--cyan-glow);
+        }
+
+        .unlock-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .lock-status {
+            margin-top: 14px;
+            min-height: 22px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--danger);
+        }
+
+        .cooldown-banner {
+            margin-top: 10px;
+            padding: 10px;
             border-radius: 8px;
-            box-sizing: border-box;
+            background: rgba(255, 59, 92, 0.12);
+            border: 1px solid rgba(255, 59, 92, 0.4);
+            color: #ff8095;
+            font-size: 13px;
+            font-weight: 700;
+            display: none;
+        }
+
+        /* 3. Main Studio Interface */
+        #studioScreen {
+            background: #000000;
+            align-items: flex-start;
+            padding-top: 32px;
+            padding-bottom: 40px;
+        }
+
+        .studio-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            padding: 26px 22px;
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.08);
+        }
+
+        .studio-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .studio-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .studio-brand img {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .studio-brand-title {
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #ffffff;
+        }
+
+        .studio-brand-sub {
+            font-size: 11px;
+            color: var(--cyan);
+            letter-spacing: 0.8px;
+        }
+
+        .lock-now-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: var(--silver);
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .lock-now-btn:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        .field-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--cyan);
+            margin-bottom: 8px;
+        }
+
+        textarea, select {
+            width: 100%;
+            padding: 13px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            background: #000000;
+            color: #ffffff;
             font-family: inherit;
             font-size: 15px;
-            transition: 0.3s;
-        }
-        input:focus, select:focus, textarea:focus {
+            margin-bottom: 18px;
             outline: none;
-            box-shadow: 0 0 12px var(--neon-pink);
-            border-color: #fff;
+            transition: 0.25s;
         }
+
+        textarea:focus, select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 12px var(--cyan-glow);
+        }
+
         textarea {
-            height: 130px;
+            min-height: 135px;
             resize: vertical;
         }
-        button {
-            width: 100%;
-            padding: 16px;
-            background: transparent;
-            border: 2px solid var(--neon-cyan);
-            color: #fff;
-            font-size: 16px;
-            font-weight: bold;
-            text-transform: uppercase;
-            border-radius: 8px;
+
+        /* Free Sound Enhancer Card */
+        .enhance-card {
+            background: #000000;
+            border: 1px solid rgba(0, 242, 254, 0.22);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 20px;
+        }
+
+        .enhance-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .enhance-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .enhance-desc {
+            font-size: 11.5px;
+            color: #9fb3c8;
+            margin-top: 3px;
+        }
+
+        .free-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 800;
+            color: #000000;
+            background: var(--cyan);
+            padding: 2px 7px;
+            border-radius: 999px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background-color: #1c2430;
+            border-radius: 34px;
             cursor: pointer;
-            transition: 0.3s;
-            text-shadow: 0 0 5px var(--neon-cyan);
-            box-shadow: inset 0 0 10px rgba(5, 217, 232, 0.2);
+            transition: 0.25s;
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
-        button:hover {
-            background: var(--neon-cyan);
-            color: #000;
-            box-shadow: 0 0 20px var(--neon-cyan);
+
+        .slider:before {
+            content: "";
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            transition: 0.25s;
         }
-        button:disabled {
+
+        input:checked + .slider {
+            background-color: var(--cyan);
+            border-color: var(--cyan);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+            background-color: #000000;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1.5px solid var(--cyan);
+            background: var(--cyan);
+            color: #000000;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            box-shadow: 0 0 22px var(--cyan-glow);
+            transform: translateY(-1px);
+        }
+
+        .generate-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        .loader {
+
+        .studio-loader {
             display: none;
             text-align: center;
-            margin-top: 15px;
-            color: var(--neon-pink);
-            font-weight: bold;
-            text-shadow: 0 0 8px var(--neon-pink);
+            margin-top: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--cyan);
         }
-        #audioPlayer {
-            width: 100%;
+
+        .studio-error {
+            display: none;
+            text-align: center;
+            margin-top: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--danger);
+        }
+
+        .audio-output-wrap {
+            display: none;
             margin-top: 20px;
-            display: none;
-            border-radius: 30px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .error {
-            color: var(--neon-pink);
-            text-align: center;
-            margin-top: 15px;
-            font-weight: bold;
+
+        .enhance-status-tag {
+            font-size: 12px;
+            color: var(--success);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        audio {
+            width: 100%;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🎙️ Voice Studio</h1>
-    
-    <label>🔑 Secret Passcode</label>
-    <input type="password" id="passcode" placeholder="Unlock engine...">
+    <!-- 1. Welcome Screen -->
+    <section id="welcomeScreen" class="screen active">
+        <div class="welcome-content">
+            <div class="brand-logo-wrap">
+                <img src="./logo.png" alt="AS Logo">
+            </div>
+            <div class="welcome-title">
+                WELCOME TO AFSAR <span class="tm-symbol">™</span> STUDIO
+            </div>
+        </div>
+    </section>
 
-    <label>📝 Hindi Script</label>
-    <textarea id="text" placeholder="Apni kahani ya script yahan likhein..."></textarea>
-    
-    <label>👤 Voice Profile</label>
-    <select id="voice">
-        <option value="hi-IN-MadhurNeural">Madhur (Male - Documentary)</option>
-        <option value="hi-IN-SwaraNeural">Swara (Female - Storytelling)</option>
-    </select>
-    
-    <button id="generateBtn" onclick="generateAudio()">Generate Audio ⚡</button>
-    
-    <div class="loader" id="loader">Audio Process ho rahi hai... ⏳</div>
-    <div class="error" id="errorMsg"></div>
-    
-    <audio id="audioPlayer" controls></audio>
-</div>
+    <!-- 2. Password Lock Screen -->
+    <section id="lockScreen" class="screen">
+        <div class="lock-box">
+            <div class="lock-logo">
+                <img src="./logo.png" alt="AS Logo">
+            </div>
+            <div id="attemptsCounter" class="attempts-text">5 ATTEMPTS REMAINING</div>
+            <div class="lock-prompt">PLEASE ENTER THE EXACT PASSWORD TO UNLOCK THIS APP</div>
 
-<script>
-    const BACKEND_URL = "https://my-tts-platform.onrender.com/generate";
+            <input
+                type="password"
+                id="passwordInput"
+                class="password-input"
+                placeholder="Enter exact password"
+                autocomplete="off"
+            >
+            <button type="button" id="unlockBtn" class="unlock-btn" onclick="verifyPassword()">
+                Unlock App
+            </button>
 
-    async function generateAudio() {
-        const text = document.getElementById("text").value;
-        const voice = document.getElementById("voice").value;
-        const passcode = document.getElementById("passcode").value;
-        
-        const btn = document.getElementById("generateBtn");
-        const loader = document.getElementById("loader");
-        const audioPlayer = document.getElementById("audioPlayer");
-        const errorMsg = document.getElementById("errorMsg");
+            <div id="lockStatus" class="lock-status"></div>
+            <div id="cooldownBanner" class="cooldown-banner"></div>
+        </div>
+    </section>
 
-        errorMsg.innerText = "";
-        audioPlayer.style.display = "none";
+    <!-- 3. Main Studio Interface (Text to Voice + Free Sound Enhancer) -->
+    <section id="studioScreen" class="screen">
+        <div class="studio-container">
+            <div class="studio-header">
+                <div class="studio-brand">
+                    <img src="./logo.png" alt="AS Logo">
+                    <div>
+                        <div class="studio-brand-title">AFSAR <span style="color:var(--cyan);">™</span> STUDIO</div>
+                        <div class="studio-brand-sub">TEXT TO VOICE &amp; SOUND ENHANCER</div>
+                    </div>
+                </div>
+                <button type="button" class="lock-now-btn" onclick="lockAppNow()">Lock</button>
+            </div>
 
-        if (!passcode) {
-            errorMsg.innerText = "Bhai, pehle Passcode daalo!";
-            return;
+            <label for="scriptText" class="field-label">Hindi / Script Text</label>
+            <textarea id="scriptText" placeholder="Apni script ya text yahan likhein..."></textarea>
+
+            <label for="voiceSelect" class="field-label">Voice Profile</label>
+            <select id="voiceSelect">
+                <option value="hi-IN-MadhurNeural">Madhur (Male - Documentary)</option>
+                <option value="hi-IN-SwaraNeural">Swara (Female - Storytelling)</option>
+            </select>
+
+            <!-- Free Sound Enhancement Option -->
+            <div class="enhance-card">
+                <div class="enhance-top">
+                    <div>
+                        <div class="enhance-title">
+                            Free Sound Enhancer <span class="free-badge">FREE</span>
+                        </div>
+                        <div class="enhance-desc">
+                            High-pass rumble cut, vocal clarity boost &amp; soft limiter
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="enhanceToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="button" id="generateBtn" class="generate-btn" onclick="generateVoice()">
+                Generate Voice
+            </button>
+
+            <div id="studioLoader" class="studio-loader">Voice generate ho rahi hai...</div>
+            <div id="studioError" class="studio-error"></div>
+
+            <div id="audioOutputWrap" class="audio-output-wrap">
+                <div id="enhanceTag" class="enhance-status-tag"></div>
+                <audio id="audioPlayer" controls></audio>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const BACKEND_URL = "https://my-tts-platform.onrender.com/generate";
+
+        // SHA-256 hash of default password "AFSAR2026"
+        const EXPECTED_PASSWORD_SHA256 = "4d4f1695b3b1e8138d74eb889e33d893c8a53d1206125c79e0c4674b23338e89";
+
+        const MAX_ATTEMPTS = 5;
+        const LOCKOUT_SECONDS = 20;
+
+        const STORAGE_KEYS = {
+            failedAttempts: "afsar_studio_failed_attempts",
+            lockUntil: "afsar_studio_lock_until",
+            unlockedSession: "afsar_studio_unlocked"
+        };
+
+        let cooldownInterval = null;
+        let verifiedPasscodeValue = "";
+
+        async function sha256Hex(plainText) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(plainText);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
         }
-        if (!text) {
-            errorMsg.innerText = "Script toh likho!";
-            return;
+
+        function showScreen(screenId) {
+            document.querySelectorAll(".screen").forEach((el) => {
+                el.classList.remove("active");
+            });
+            const target = document.getElementById(screenId);
+            if (target) {
+                target.classList.add("active");
+            }
         }
 
-        btn.disabled = true;
-        loader.style.display = "block";
+        function runWelcomeSequence() {
+            const welcomeEl = document.getElementById("welcomeScreen");
+            showScreen("welcomeScreen");
 
-        try {
-            const response = await fetch(BACKEND_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text, voice, passcode }) 
+            requestAnimationFrame(() => {
+                welcomeEl.classList.add("animate-in");
             });
 
-            if (response.status === 401) {
-                throw new Error("❌ Access Denied: Galat Passcode!");
+            setTimeout(() => {
+                welcomeEl.classList.remove("animate-in");
+                welcomeEl.classList.add("animate-out");
+
+                setTimeout(() => {
+                    welcomeEl.classList.remove("animate-out");
+                    if (sessionStorage.getItem(STORAGE_KEYS.unlockedSession) === "true") {
+                        showScreen("studioScreen");
+                    } else {
+                        showScreen("lockScreen");
+                        syncLockoutState();
+                    }
+                }, 760);
+            }, 2200);
+        }
+
+        function getFailedAttempts() {
+            const val = parseInt(localStorage.getItem(STORAGE_KEYS.failedAttempts) || "0", 10);
+            return Number.isNaN(val) ? 0 : Math.min(Math.max(val, 0), MAX_ATTEMPTS);
+        }
+
+        function updateAttemptsDisplay() {
+            const failed = getFailedAttempts();
+            const remaining = Math.max(0, MAX_ATTEMPTS - failed);
+            const counterEl = document.getElementById("attemptsCounter");
+            counterEl.textContent = `${remaining} ATTEMPTS REMAINING`;
+            if (remaining <= 2) {
+                counterEl.classList.add("warning");
+            } else {
+                counterEl.classList.remove("warning");
             }
-            if (!response.ok) {
-                throw new Error("Server error! Thodi der baad try karo.");
+        }
+
+        function syncLockoutState() {
+            updateAttemptsDisplay();
+
+            const lockUntil = parseInt(localStorage.getItem(STORAGE_KEYS.lockUntil) || "0", 10);
+            const now = Date.now();
+            const inputEl = document.getElementById("passwordInput");
+            const btnEl = doc ument.getElementById("unlockBtn");
+            const bannerEl = document.getElementById("cooldownBanner");
+
+            if (cooldownInterval) {
+                clearInterval(cooldownInterval);
+                cooldownInterval = null;
             }
 
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            audioPlayer.src = url;
-            audioPlayer.style.display = "block";
-            
-        } catch (error) {
-            errorMsg.innerText = error.message;
-        } finally {
-            btn.disabled = false;
-            loader.style.display = "none";
+            if (lockUntil > now) {
+                inputEl.disabled = true;
+                btnEl.disabled = true;
+                bannerEl.style.display = "block";
+
+                const tick = () => {
+                    const leftMs = lockUntil - Date.now();
+                    const leftSec = Math.ceil(leftMs / 1000);
+                    if (leftSec <= 0) {
+                        clearInterval(cooldownInterval);
+                        cooldownInterval = null;
+                        localStorage.setItem(STORAGE_KEYS.failedAttempts, "0");
+                        localStorage.removeItem(STORAGE_KEYS.lockUntil);
+                        inputEl.disabled = false;
+                        btnEl.disabled = false;
+                        bannerEl.style.display = "none";
+                        document.getElementById("lockStatus").textContent = "";
+                        updateAttemptsDisplay();
+                        inputEl.focus();
+                    } else {
+                        bannerEl.textContent = `5 wrong attempts. App locked for ${leftSec}s`;
+                    }
+                };
+
+                tick();
+                cooldownInterval = setInterval(tick, 250);
+            } else {
+                if (lockUntil && lockUntil <= now) {
+                    localStorage.setItem(STORAGE_KEYS.failedAttempts, "0");
+                    localStorage.removeItem(STORAGE_KEYS.lockUntil);
+                    updateAttemptsDisplay();
+                }
+                inputEl.disabled = false;
+                btnEl.disabled = false;
+                bannerEl.style.display = "none";
+            }
         }
-    }
-</script>
+
+        async function verifyPassword() {
+            const lockUntil = parseInt(localStorage.getItem(STORAGE_KEYS.lockUntil) || "0", 10);
+            if (lockUntil > Date.now()) {
+                syncLockoutState();
+                return;
+            }
+
+            const inputEl = document.getElementById("passwordInput");
+            const statusEl = document.getElementById("lockStatus");
+            const entered = inputEl.value;
+
+            statusEl.textContent = "";
+
+            if (!entered) {
+                statusEl.textContent = "Password enter karein.";
+                return;
+            }
+
+            const enteredHash = await sha256Hex(entered);
+
+            if (enteredHash === EXPECTED_PASSWORD_SHA256) {
+                verifiedPasscodeValue = entered;
+                localStorage.setItem(STORAGE_KEYS.failedAttempts, "0");
+                localStorage.removeItem(STORAGE_KEYS.lockUntil);
+                sessionStorage.setItem(STORAGE_KEYS.unlockedSession, "true");
+                inputEl.value = "";
+                statusEl.textContent = "";
+                showScreen("studioScreen");
+            } else {
+                let failed = getFailedAttempts() + 1;
+                inputEl.value = "";
+
+                if (failed >= MAX_ATTEMPTS) {
+                    const until = Date.now() + LOCKOUT_SECONDS * 1000;
+                    localStorage.setItem(STORAGE_KEYS.failedAttempts, String(MAX_ATTEMPTS));
+                    localStorage.setItem(STORAGE_KEYS.lockUntil, String(until));
+                    statusEl.textContent = "5 wrong attempts reached. App stopped for 20 seconds.";
+                    syncLockoutState();
+                } else {
+                    localStorage.setItem(STORAGE_KEYS.failedAttempts, String(failed));
+                    const rem = MAX_ATTEMPTS - failed;
+                    statusEl.textContent = `Wrong password! ${rem} attempt(s) left.`;
+                    updateAttemptsDisplay();
+                }
+            }
+        }
+
+        function lockAppNow() {
+            sessionStorage.removeItem(STORAGE_KEYS.unlockedSession);
+            verifiedPasscodeValue = "";
+            document.getElementById("lockStatus").textContent = "";
+            document.getElementById("passwordInput").value = "";
+            showScreen("lockScreen");
+            syncLockoutState();
+        }
+
+        document.getElementById("passwordInput").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                verifyPassword();
+            }
+        });
+
+        async function enhanceAudioBlob(sourceBlob) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) {
+                return sourceBlob;
+            }
+
+            const arrayBuffer = await sourceBlob.arrayBuffer();
+            const decodeCtx = new AudioCtx();
+            const decodedBuffer = await decodeCtx.decodeAudioData(arrayBuffer);
+            await decodeCtx.close();
+
+            const offlineCtx = new OfflineAudioContext(
+                decodedBuffer.numberOfChannels,
+                decodedBuffer.length,
+                decodedBuffer.sampleRate
+            );
+
+            const srcNode = offlineCtx.createBufferSource();
+            srcNode.buffer = decodedBuffer;
+
+            const highPass = offlineCtx.createBiquadFilter();
+            highPass.type = "highpass";
+            highPass.frequency.value = 85;
+
+            const presenceBoost = offlineCtx.createBiquadFilter();
+            presenceBoost.type = "peaking";
+            presenceBoost.frequency.value = 2800;
+            presenceBoost.Q.value = 1.2;
+            presenceBoost.gain.value = 3.5;
+
+            const airShelf = offlineCtx.createBiquadFilter();
+            airShelf.type = "highshelf";
+            airShelf.frequency.value = 6500;
+            airShelf.gain.value = 1.8;
+
+            const compressor = offlineCtx.createDynamicsCompressor();
+            compressor.threshold.value = -18;
+            compressor.knee.value = 18;
+            compressor.ratio.value = 3;
+            compressor.attack.value = 0.005;
+            compressor.release.value = 0.12;
+
+            srcNode.connect(highPass);
+            highPass.connect(presenceBoost);
+            presenceBoost.connect(airShelf);
+            airShelf.connect(compressor);
+            compressor.connect(offlineCtx.destination);
+
+            srcNode.start(0);
+            const renderedBuffer = await offlineCtx.startRendering();
+            return audioBufferToWavBlob(renderedBuffer);
+        }
+
+        function audioBufferToWavBlob(buffer) {
+            const numChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const format = 1;
+            const bitDepth = 16;
+            const numSamples = buffer.length;
+            const blockAlign = (numChannels * bitDepth) / 8;
+            const byteRate = sampleRate * blockAlign;
+            const dataSize = numSamples * blockAlign;
+            const totalSize = 44 + dataSize;
+
+            const out = new ArrayBuffer(totalSize);
+            const view = new DataView(out);
+
+            const writeString = (offset, str) => {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset + i, str.charCodeAt(i));
+                }
+            };
+
+            writeString(0, "RIFF");
+            view.setUint32(4, 36 + dataSize, true);
+            writeString(8, "WAVE");
+            writeString(12, "fmt ");
+            view.setUint32(16, 16, true);
+            view.setUint16(20, format, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitDepth, true);
+            writeString(36, "data");
+            view.setUint32(40, dataSize, true);
+
+            let offset = 44;
+            for (let i = 0; i < numSamples; i++) {
+                for (let ch = 0; ch < numChannels; ch++) {
+                    let sample = buffer.getChannelData(ch)[i];
+                    sample = Math.max(-1, Math.min(1, sample));
+                    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
+                    offset += 2;
+                }
+            }
+
+            return new Blob([out], { type: "audio/wav" });
+        }
+
+        async function generateVoice() {
+            const text = document.getElementById("scriptText").value.trim();
+            const voice = document.getElementById("voiceSelect").value;
+            const enhanceEnabled = document.getElementById("enhanceToggle").checked;
+
+            const btn = document.getElementById("generateBtn");
+            const loader = document.getElementById("studioLoader");
+            const errEl = document.getElementById("studioError");
+            const outWrap = document.getElementById("audioOutputWrap");
+            const enhanceTag = document.getElementById("enhanceTag");
+            const player = document.getElementById("audioPlayer");
+
+            errEl.style.display = "none";
+            errEl.textContent = "";
+            outWrap.style.display = "none";
+
+            if (!text) {
+                errEl.textContent = "Pehle script text likhein.";
+                errEl.style.display = "block";
+                return;
+            }
+
+            btn.disabled = true;
+            loader.style.display = "block";
+
+            try {
+                const payload = { text, voice };
+                if (verifiedPasscodeValue) {
+                    payload.passcode = verifiedPasscodeValue;
+                }
+
+                const res = await fetch(BACKEND_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.status === 401) {
+                    throw new Error("Backend passcode rejected. Please re-unlock app.");
+                }
+                if (!res.ok) {
+                    throw new Error("Audio generate nahi ho paya. Thodi der baad try karein.");
+                }
+
+                let finalBlob = await res.blob();
+
+                if (enhanceEnabled) {
+                    loader.textContent = "Free Sound Enhancer apply ho raha hai...";
+                    finalBlob = await enhanceAudioBlob(finalBlob);
+                    enhanceTag.textContent = "Enhanced with Free Sound Enhancer";
+                } else {
+                    enhanceTag.textContent = "Raw TTS Output (Enhancer Off)";
+                }
+
+                const audioUrl = URL.createObjectURL(finalBlob);
+                player.src = audioUrl;
+                outWrap.style.display = "block";
+            } catch (err) {
+                errEl.textContent = err.message || "Unexpected error.";
+                errEl.style.display = "block";
+            } finally {
+                btn.disabled = false;
+                loader.style.display = "none";
+                loader.textContent = "Voice generate ho rahi hai...";
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            runWelcomeSequence();
+        });
+    </script>
 </body>
 </html>
