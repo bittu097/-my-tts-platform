@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AFSAR ™ STUDIO</title>
+    <link rel="icon" type="image/png" href="./logo.png">
+    <link rel="apple-touch-icon" href="./logo.png">
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
@@ -84,11 +86,11 @@
         }
 
         .brand-logo-wrap {
-            width: 112px;
-            height: 112px;
+            width: 114px;
+            height: 114px;
             margin: 0 auto 22px;
-            border-radius: 26px;
-            border: 1.5px solid var(--border-subtle);
+            border-radius: 50%;
+            border: 2px solid var(--cyan);
             background: #05080d;
             box-shadow: 0 0 28px var(--cyan-glow);
             display: flex;
@@ -100,6 +102,7 @@
         .brand-logo-wrap img {
             width: 100%;
             height: 100%;
+            border-radius: 50%;
             object-fit: cover;
         }
 
@@ -135,21 +138,22 @@
         }
 
         .lock-logo {
-            width: 68px;
-            height: 68px;
+            width: 72px;
+            height: 72px;
             margin: 0 auto 18px;
-            border-radius: 16px;
+            border-radius: 50%;
             overflow: hidden;
-            border: 1px solid var(--border-subtle);
+            border: 1.5px solid var(--cyan);
+            box-shadow: 0 0 16px var(--cyan-glow);
         }
 
         .lock-logo img {
             width: 100%;
             height: 100%;
+            border-radius: 50%;
             object-fit: cover;
         }
-
-        .attempts-text {
+                .attempts-text {
             font-size: 13px;
             font-weight: 700;
             letter-spacing: 1.5px;
@@ -181,8 +185,8 @@
             color: #ffffff;
             font-size: 16px;
             text-align: center;
-            letter-spacing: 3px;
-            margin-bottom: 14px;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
             outline: none;
             transition: border-color 0.25s, box-shadow 0.25s;
         }
@@ -195,6 +199,23 @@
         .password-input:disabled {
             opacity: 0.45;
             cursor: not-allowed;
+        }
+
+        .show-pass-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            font-size: 12.5px;
+            color: #9fb3c8;
+            margin-bottom: 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .show-pass-row input {
+            accent-color: var(--cyan);
+            cursor: pointer;
         }
 
         .unlock-btn {
@@ -277,11 +298,11 @@
         }
 
         .studio-brand img {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
             object-fit: cover;
-            border: 1px solid var(--border-subtle);
+            border: 1.5px solid var(--cyan);
         }
 
         .studio-brand-title {
@@ -524,7 +545,14 @@
                 class="password-input"
                 placeholder="Enter exact password"
                 autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
             >
+            <label class="show-pass-row">
+                <input type="checkbox" id="showPassCheck" onchange="togglePasswordVisibility(this.checked)">
+                Show Password
+            </label>
+
             <button type="button" id="unlockBtn" class="unlock-btn" onclick="verifyPassword()">
                 Unlock App
             </button>
@@ -590,10 +618,10 @@
     </section>
 
     <script>
-        const BACKEND_URL = "https://my-tts-platform.onrender.com/generate";
+                const BACKEND_URL = "https://my-tts-platform.onrender.com/generate";
 
-        // SHA-256 hash of default password "N@@NI-MA@760"
-        const EXPECTED_PASSWORD_SHA256 = "a7899834e7c6fc8fe871667c572fd236d354f30165c7273b260934f44a2072b4";
+        // App Password
+        const EXPECTED_PASSCODE = "AFSAR#097";
 
         const MAX_ATTEMPTS = 5;
         const LOCKOUT_SECONDS = 20;
@@ -607,12 +635,11 @@
         let cooldownInterval = null;
         let verifiedPasscodeValue = "";
 
-        async function sha256Hex(plainText) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(plainText);
-            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        function togglePasswordVisibility(show) {
+            const inputEl = document.getElementById("passwordInput");
+            if (inputEl) {
+                inputEl.type = show ? "text" : "password";
+            }
         }
 
         function showScreen(screenId) {
@@ -718,7 +745,7 @@
             }
         }
 
-        async function verifyPassword() {
+        function verifyPassword() {
             const lockUntil = parseInt(localStorage.getItem(STORAGE_KEYS.lockUntil) || "0", 10);
             if (lockUntil > Date.now()) {
                 syncLockoutState();
@@ -727,7 +754,7 @@
 
             const inputEl = document.getElementById("passwordInput");
             const statusEl = document.getElementById("lockStatus");
-            const entered = inputEl.value;
+            const entered = inputEl.value.trim();
 
             statusEl.textContent = "";
 
@@ -736,9 +763,7 @@
                 return;
             }
 
-            const enteredHash = await sha256Hex(entered);
-
-            if (enteredHash === EXPECTED_PASSWORD_SHA256) {
+            if (entered === EXPECTED_PASSCODE) {
                 verifiedPasscodeValue = entered;
                 localStorage.setItem(STORAGE_KEYS.failedAttempts, "0");
                 localStorage.removeItem(STORAGE_KEYS.lockUntil);
@@ -779,8 +804,7 @@
                 verifyPassword();
             }
         });
-
-        async function enhanceAudioBlob(sourceBlob) {
+                async function enhanceAudioBlob(sourceBlob) {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             if (!AudioCtx) {
                 return sourceBlob;
@@ -909,6 +933,8 @@
                 const payload = { text, voice };
                 if (verifiedPasscodeValue) {
                     payload.passcode = verifiedPasscodeValue;
+                } else {
+                    payload.passcode = EXPECTED_PASSCODE;
                 }
 
                 const res = await fetch(BACKEND_URL, {
