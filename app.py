@@ -9,7 +9,7 @@ import uuid
 app = Flask(__name__)
 CORS(app)
 
-SECRET_PASSCODE = "N@@NI-MA@760"
+SECRET_PASSCODE = "AFSAR#097"
 AUDIO_DIR = "generated_audio"
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
